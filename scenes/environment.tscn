@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://dmqbvj54vb28g"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y44tv"]
+albedo_color = Color(0.6799758, 0.7152409, 0.6651851, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bc5iu"]
+material = SubResource("StandardMaterial3D_y44tv")
+size = Vector3(24, 0.4, 24)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_y44tv"]
+size = Vector3(24, 0.4, 24)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bc5iu"]
+albedo_color = Color(0.85430586, 0.4366271, 0.4100209, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_fm4en"]
+material = SubResource("StandardMaterial3D_bc5iu")
+size = Vector3(9.5, 1.1, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d5dl1"]
+size = Vector3(9.5, 1.1, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fm4en"]
+albedo_color = Color(0.4366271, 0.48452926, 0.58383155, 1)
+roughness = 0.89
+
+[sub_resource type="BoxMesh" id="BoxMesh_d5dl1"]
+material = SubResource("StandardMaterial3D_fm4en")
+size = Vector3(10, 4.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hlc4h"]
+size = Vector3(10, 4.2, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d5dl1"]
+albedo_color = Color(0.76862043, 0.7528677, 0.735357, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hlc4h"]
+material = SubResource("StandardMaterial3D_d5dl1")
+size = Vector3(0.5, 4.2, 11.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0psjf"]
+size = Vector3(0.4, 4.2, 11.4)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_y44tv"]
+sky_top_color = Color(0.13114098, 0.4992593, 0.57384574, 1)
+sky_horizon_color = Color(0.7738333, 0.7796688, 0.7913334, 1)
+
+[sub_resource type="Sky" id="Sky_bc5iu"]
+sky_material = SubResource("ProceduralSkyMaterial_y44tv")
+
+[sub_resource type="Environment" id="Environment_fm4en"]
+background_mode = 2
+sky = SubResource("Sky_bc5iu")
+
+[node name="GreyboxEnvironment" type="Node3D" unique_id=1161449947]
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=978904442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1525323736]
+mesh = SubResource("BoxMesh_bc5iu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=995112649]
+shape = SubResource("BoxShape3D_y44tv")
+
+[node name="Counter" type="StaticBody3D" parent="." unique_id=1865756332]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 4.3)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Counter" unique_id=1743870396]
+mesh = SubResource("BoxMesh_fm4en")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Counter" unique_id=2025980062]
+shape = SubResource("BoxShape3D_d5dl1")
+
+[node name="Backdrop" type="StaticBody3D" parent="." unique_id=1224482832]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, -6.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Backdrop" unique_id=1731370705]
+mesh = SubResource("BoxMesh_d5dl1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Backdrop" unique_id=2040462381]
+shape = SubResource("BoxShape3D_hlc4h")
+
+[node name="SideWallLeft" type="StaticBody3D" parent="." unique_id=1917639150]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.1, -1)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SideWallLeft" unique_id=1960209886]
+mesh = SubResource("BoxMesh_hlc4h")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideWallLeft" unique_id=1578541365]
+shape = SubResource("BoxShape3D_0psjf")
+
+[node name="SideWallRight" type="StaticBody3D" parent="." unique_id=1642871930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.1, -1)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SideWallRight" unique_id=702473029]
+mesh = SubResource("BoxMesh_hlc4h")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideWallRight" unique_id=622670429]
+shape = SubResource("BoxShape3D_0psjf")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1713646838]
+environment = SubResource("Environment_fm4en")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1491163238]
+transform = Transform3D(0.8660254, -0.3213938, 0.38302222, 0, 0.76604444, 0.6427876, -0.5, -0.55667037, 0.66341394, 0, 8, 0)
+shadow_enabled = true
