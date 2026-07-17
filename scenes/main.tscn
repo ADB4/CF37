@@ -7,6 +7,3 @@
 script = ExtResource("1_o5qli")
 
 [node name="GreyboxEnvironment" parent="." unique_id=1161449947 instance=ExtResource("2_0wfyh")]
-
-[node name="Camera3D" type="Camera3D" parent="GreyboxEnvironment" unique_id=239956132]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 6)
