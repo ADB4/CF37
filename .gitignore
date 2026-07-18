@@ -24,3 +24,17 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+*.blend1
+*.blend2
+*.blend3
+
+.DS_Store
+
+*.swp
+*.swo
+*~
+
+.vscode/
+
+.directory
