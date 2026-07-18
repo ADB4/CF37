@@ -5,12 +5,15 @@ signal charge_started
 signal charge_updated(ratio: float)
 signal charge_released
 signal pie_thrown(pie: PieProjectile)
+signal pointer_lock_changed(captured: bool)
 
 var active := true:
 	set(value):
 		active = value
 		if not value and _charging:
 			_cancel_charge()
+
+var _pointer_captured := false
 
 @export_group("Look")
 @export var mouse_sensitivity := 0.0022
@@ -41,13 +44,20 @@ var _cooldown_remaining := 0.0
 @onready var _spawn_point: Marker3D = $Camera3D/SpawnPoint
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	pass
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		if _pointer_captured:
+			release_mouse()
+	
 func _process(delta: float) -> void:
 	if not active:
 		return
 	_handle_movement(delta)
 	_handle_throw(delta)
+	if _pointer_captured and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		_on_pointer_lock_lost()
 		
 func _handle_movement(delta: float) -> void:
 	var axis := Input.get_axis("move_left", "move_right")
@@ -57,6 +67,19 @@ func _handle_movement(delta: float) -> void:
 # godot processes input in a pipeline with multiple stages, each stage gives first dibs
 # the order is generally: _shortcut_input -> _input -> gui controls -> _unhandled_key_input -> _unhandled_input
 func _unhandled_input(event: InputEvent) -> void:
+	# pause
+	if event.is_action_pressed("pause"):
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			release_mouse()
+		get_viewport().set_input_as_handled()
+		return
+		
+	# click to recapture
+	if event.is_action_pressed("throw") and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		capture_mouse()
+		get_viewport().set_input_as_handled()
+		return
+		
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_yaw = clampf(
 			_yaw - event.relative.x * mouse_sensitivity,
@@ -70,25 +93,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		)
 		rotation.y = _yaw
 		_camera.rotation.x = _pitch
-	
-	# release pointer lock
-	if event.is_action_pressed("pause") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		if _charging:
-			_cancel_charge()
-		get_viewport().set_input_as_handled()
-		return
-	
-	# pointer re-capture
-	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		get_viewport().set_input_as_handled()
-		return
-		
-	if not active:
-		return
-		
-	if event.is_action_pressed("throw") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+
+	if active and event.is_action_pressed("throw"):
 		if _cooldown_remaining <= 0.0 and not _charging:
 			_charging = true
 			_charge_time = 0.0
@@ -97,7 +103,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 	if event.is_action_released("throw") and _charging:
 		_throw()
+	
+func capture_mouse() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_pointer_captured = true
+	_cooldown_remaining = 0.2
+	pointer_lock_changed.emit(true)
 
+func release_mouse() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_pointer_captured = false
+	_cancel_charge()
+	pointer_lock_changed.emit(false)
+	
+func _on_pointer_lock_lost() -> void:
+	_pointer_captured = false
+	if _charging:
+		_cancel_charge()
+	pointer_lock_changed.emit(false)
+	
 # throwing logic
 func _handle_throw(delta: float) -> void:
 	if _cooldown_remaining > 0.0:
@@ -131,6 +155,8 @@ func _throw() -> void:
 	
 	
 func _cancel_charge() -> void:
+	if not _charging:
+		return
 	_charging = false
 	_charge_time = 0.0
 	charge_released.emit()
