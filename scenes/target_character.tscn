@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://lpqbd2rp56fv"]
+
+[ext_resource type="Script" uid="uid://b16626d83aecg" path="res://scripts/target_character.gd" id="1_r11h4"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_r11h4"]
+radius = 0.3
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vdco3"]
+albedo_color = Color(0, 0.40057176, 0.7851045, 1)
+roughness = 0.4
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cywf5"]
+material = SubResource("StandardMaterial3D_vdco3")
+radius = 0.25
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r11h4"]
+albedo_color = Color(0.8048779, 0.6754278, 0.52385604, 1)
+roughness = 0.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_vdco3"]
+material = SubResource("StandardMaterial3D_r11h4")
+radius = 0.18
+height = 0.36
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r11h4"]
+size = Vector3(0.7, 1, 0.7)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_vdco3"]
+radius = 0.25
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vdco3"]
+size = Vector3(6, 3, 5)
+
+[node name="TargetCharacter" type="CharacterBody3D" unique_id=1860628569]
+collision_layer = 4
+script = ExtResource("1_r11h4")
+
+[node name="BodyCollider" type="CollisionShape3D" parent="." unique_id=1459306388]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("CapsuleShape3D_r11h4")
+
+[node name="Pivot" type="Node3D" parent="." unique_id=474057676]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Pivot" unique_id=915684001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("CapsuleMesh_cywf5")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Pivot" unique_id=397660043]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38, 0)
+mesh = SubResource("SphereMesh_vdco3")
+
+[node name="HitZoneBody" type="Area3D" parent="Pivot" unique_id=2010000546]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/HitZoneBody" unique_id=914431514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_r11h4")
+
+[node name="HitZoneHead" type="Area3D" parent="Pivot" unique_id=975589169]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/HitZoneHead" unique_id=610613314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.378, 0)
+shape = SubResource("SphereShape3D_vdco3")
+
+[node name="DodgeSensor" type="Area3D" parent="." unique_id=1208586187]
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DodgeSensor" unique_id=1849283588]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 3)
+shape = SubResource("BoxShape3D_vdco3")

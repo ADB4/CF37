@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dmqbvj54vb28g" path="res://scenes/environment.tscn" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://dep2n4fq8f3cj" path="res://scripts/player_controller.gd" id="3_sugp2"]
 [ext_resource type="PackedScene" uid="uid://b6x33a1s68d4r" path="res://scenes/pie_projectile.tscn" id="4_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://lpqbd2rp56fv" path="res://scenes/target_character.tscn" id="5_tbgi4"]
 
 [node name="Main" type="Node3D" unique_id=1056491396]
 script = ExtResource("1_o5qli")
@@ -24,3 +25,7 @@ current = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.18, -0.55)
 
 [node name="ProjectileManager" type="Node3D" parent="." unique_id=24296500]
+
+[node name="TargetCharacter" parent="." unique_id=1860628569 instance=ExtResource("5_tbgi4")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
