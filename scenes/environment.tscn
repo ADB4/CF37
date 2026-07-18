@@ -40,7 +40,7 @@ material = SubResource("StandardMaterial3D_d5dl1")
 size = Vector3(0.5, 4.2, 11.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0psjf"]
-size = Vector3(0.4, 4.2, 11.4)
+size = Vector3(0.5, 4.2, 11.4)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_y44tv"]
 sky_top_color = Color(0.13114098, 0.4992593, 0.57384574, 1)
