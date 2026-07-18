@@ -1,40 +1,70 @@
-# Godot 4+ specific ignores
-.godot/
-/android/
-# Web build output
-/build/
+# =============================================================================
+# CountyFair-37 — .gitignore
+# =============================================================================
 
-# GDExtension compiled output
-extension/bin/
+
+# ── Godot 4 engine cache ─────────────────────────────────────────────────────
+# .godot/ contains editor state, shader cache, and the imported/ directory
+# where Godot stores compiled resources (.ctex, .scn). Everything here is
+# regenerated from the source files + their .import sidecars. Must stay
+# ignored — never commit, never LFS-track.
+.godot/
+
+# ── Build output ─────────────────────────────────────────────────────────────
+# Web export goes to countyfair-37/build/web/.
+# GDExtension C++ build artifacts live in extension/build/ and extension/bin/.
+# Using explicit paths so we don't accidentally ignore a future directory
+# named "build" that we actually want.
+countyfair-37/build/
 extension/build/
-# Godot 4+ specific ignores
-.godot/
-.nomedia
+extension/bin/
 
-# Godot-specific ignores
-.import/
-export.cfg
-export_credentials.cfg
-*.tmp
-
-# Imported translations (automatically generated from CSV files)
-*.translation
-
-# Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json
-
+# ── Blender auto-backups ─────────────────────────────────────────────────────
+# Blender saves a .blend1 next to every .blend on each save. These are
+# local rolling backups — Git is the version history. If you want deeper
+# Blender undo (blend2, blend3…), ignore those too.
 *.blend1
 *.blend2
 *.blend3
 
+# ── Godot export credentials ─────────────────────────────────────────────────
+# Contains signing keys for Android/iOS exports. Never commit.
+export_credentials.cfg
+
+# ── Editor temporaries ───────────────────────────────────────────────────────
+*.tmp
+
+# ── Godot 3 legacy ───────────────────────────────────────────────────────────
+# .import/ was Godot 3's import cache (Godot 4 uses .godot/imported/).
+# Harmless to keep; prevents surprises if old tooling touches the repo.
+.import/
+
+# ── Translations (auto-generated from CSV) ───────────────────────────────────
+*.translation
+
+# ── Mono / C# (not used in this project, defensive) ─────────────────────────
+.mono/
+data_*/
+mono_crash.*.json
+
+# ── Android export (not targeted) ────────────────────────────────────────────
+/android/
+
+# ── OS and editor junk ───────────────────────────────────────────────────────
+# macOS
 .DS_Store
 
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux thumbnails
+.directory
+
+# Vim / editor swap files
 *.swp
 *.swo
 *~
 
-.vscode/
-
-.directory
+# VSCode (optional — remove if you commit workspace settings)
+# .vscode/

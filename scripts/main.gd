@@ -30,3 +30,4 @@ func _on_charge_released() -> void:
 
 func _on_pie_thrown(pie: PieProjectile) -> void:
 	print("=== pie_thrown (speed %.1f)" % pie.linear_velocity.length())
+g

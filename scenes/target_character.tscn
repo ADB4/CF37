@@ -70,6 +70,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.378, 0)
 shape = SubResource("SphereShape3D_vdco3")
 
 [node name="DodgeSensor" type="Area3D" parent="." unique_id=1208586187]
+collision_layer = 0
 collision_mask = 2
 monitorable = false
 
