@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://b6x33a1s68d4r"]
+
+[ext_resource type="Script" uid="uid://c5gfs34pvjua5" path="res://scripts/pie_projectile.gd" id="1_wmo0s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yt3ui"]
+albedo_color = Color(0.97269243, 0.94100165, 0.85430586, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aq5xs"]
+material = SubResource("StandardMaterial3D_yt3ui")
+top_radius = 0.16
+bottom_radius = 0.13
+height = 0.08
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_6f5if"]
+height = 0.08
+radius = 0.16
+
+[node name="PieProjectile" type="RigidBody3D" unique_id=1685531476]
+collision_layer = 2
+mass = 0.5
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_wmo0s")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2059198896]
+mesh = SubResource("CylinderMesh_aq5xs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1957825758]
+shape = SubResource("CylinderShape3D_6f5if")

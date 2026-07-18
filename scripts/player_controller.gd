@@ -21,9 +21,13 @@ var _pitch := 0.0
 @export var min_x := -3.2
 @export var max_x := 3.2
 
+@export_group("Throw (temp)")
+@export var pie_scene: PackedScene
+@export var projectile_parent: Node3D
+@export var test_throw_speed := 18.0
 
 @onready var _camera: Camera3D = $Camera3D
-
+@onready var _spawn_point: Marker3D = $Camera3D/SpawnPoint
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -51,3 +55,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		)
 		rotation.y = _yaw
 		_camera.rotation.x = _pitch
+
+	if active and event.is_action_pressed("throw") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_test_throw()
+
+func _test_throw() -> void:
+	if pie_scene == null or projectile_parent == null:
+		return
+	var pie: PieProjectile = pie_scene.instantiate()
+	projectile_parent.add_child(pie)
+	pie.global_transform = _spawn_point.global_transform
+	pie.launch(-_camera.global_transform.basis.z, test_throw_speed)
