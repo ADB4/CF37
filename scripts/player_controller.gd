@@ -53,6 +53,9 @@ func _handle_movement(delta: float) -> void:
 	var axis := Input.get_axis("move_left", "move_right")
 	position.x = clampf(position.x + axis * move_speed * delta, min_x, max_x)
 
+# runs once per input event
+# godot processes input in a pipeline with multiple stages, each stage gives first dibs
+# the order is generally: _shortcut_input -> _input -> gui controls -> _unhandled_key_input -> _unhandled_input
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_yaw = clampf(
@@ -68,6 +71,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotation.y = _yaw
 		_camera.rotation.x = _pitch
 	
+	# release pointer lock
+	if event.is_action_pressed("pause") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		if _charging:
+			_cancel_charge()
+		get_viewport().set_input_as_handled()
+		return
+	
+	# pointer re-capture
 	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()
