@@ -20,6 +20,7 @@ projectile_parent = NodePath("../ProjectileManager")
 [node name="Camera3D" type="Camera3D" parent="PlayerController" unique_id=1564788320]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 current = true
+fov = 45.3
 
 [node name="SpawnPoint" type="Marker3D" parent="PlayerController/Camera3D" unique_id=2089896836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.18, -0.55)
@@ -28,4 +29,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.18, -0.55)
 
 [node name="TargetCharacter" parent="." unique_id=1860628569 instance=ExtResource("5_tbgi4")]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
