@@ -60,8 +60,6 @@ func _on_hit_zone_body_entered(body: Node3D, zone: String) -> void:
 
 	if pie.scored or pie.is_splatted():
 		return
-
-	# Claim first — see decision 2 in the header.
 	pie.scored = true
 	pie.splat()
 

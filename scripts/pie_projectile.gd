@@ -1,19 +1,3 @@
-## CF37-18 reference — scripts/pie_projectile.gd
-##
-## Only one thing changes in this file: the scoring flow needs to ask a pie
-## whether its flight is already over, and `_has_splatted` is private.
-##
-## Why a method and not just making the flag public: `scored` is public
-## because the target legitimately WRITES it. Splat state is owned entirely
-## by the pie — outsiders read it, never set it. A getter encodes that
-## asymmetry in the API instead of relying on everyone's good manners.
-##
-## Why not check `freeze` instead: `splat()` uses `set_deferred("freeze",
-## true)` because physics callbacks cannot mutate physics state inline. So
-## `freeze` is still false for the rest of the current physics step — the
-## exact window in which the second zone's `body_entered` fires. Reading it
-## would be a race.
-
 class_name PieProjectile
 extends RigidBody3D
 
@@ -43,9 +27,6 @@ signal splattered
 @export var lifetime := 6.0
 
 
-## Set by the scoring flow the moment a hit zone claims this pie, so the
-## overlapping second zone finds it already spent. Written from outside;
-## never reset. (CF37-18)
 var scored := false
 
 var _has_splatted := false
