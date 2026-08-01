@@ -1,3 +1,13 @@
+## CF37-18 reference — scripts/main.gd
+##
+## The hub gains exactly one connection: the target's new `hit` signal.
+## `hit_zone_entered` stays wired to both the console print and DebugEval,
+## unchanged — CF37-18 changed *when* it fires, not its shape.
+##
+## Note what is NOT here: main.gd does not keep a score. That is CF37-9's
+## job, and it is In Progress. The print below is the seam CF37-9 replaces
+## with `_score += points`.
+
 extends Node3D
 
 @onready var _player: PlayerController = $PlayerController
@@ -16,6 +26,7 @@ func _ready() -> void:
 	_player.pie_thrown.connect(_on_pie_thrown)
 
 	_target.hit_zone_entered.connect(_on_target_hit_zone_entered)
+	_target.hit.connect(_on_target_hit)
 
 	# --- Evaluation instrumentation (temporary) ---
 	_debug_eval = DebugEval.new()
@@ -29,6 +40,10 @@ func _ready() -> void:
 
 func _on_target_hit_zone_entered(zone: String, body: Node3D) -> void:
 	print("*** HIT: %s zone (by %s)" % [zone, body.name])
+
+
+func _on_target_hit(points: int, zone: String) -> void:
+	print("*** SCORED: %d pts (%s)" % [points, zone])
 
 
 func _on_charge_started() -> void:
