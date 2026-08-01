@@ -1,13 +1,3 @@
-## CF37-18 reference — scripts/main.gd
-##
-## The hub gains exactly one connection: the target's new `hit` signal.
-## `hit_zone_entered` stays wired to both the console print and DebugEval,
-## unchanged — CF37-18 changed *when* it fires, not its shape.
-##
-## Note what is NOT here: main.gd does not keep a score. That is CF37-9's
-## job, and it is In Progress. The print below is the seam CF37-9 replaces
-## with `_score += points`.
-
 extends Node3D
 
 @onready var _player: PlayerController = $PlayerController
