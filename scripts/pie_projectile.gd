@@ -35,6 +35,10 @@ var _has_touched := false
 
 func _ready() -> void:
 
+	## CF37-60
+	linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE
+	linear_damp = 0.0
+	
 	var mat := PhysicsMaterial.new()
 	mat.bounce = bounciness
 	mat.friction = surface_friction

@@ -107,13 +107,24 @@ func on_charge_released() -> void:
 func on_pie_thrown(pie: PieProjectile) -> void:
 	_throws.append({
 		"pie_id": pie.get_instance_id(),
+		"spawn": pie.global_position,
+		"range": -1.0,
 		"ratio": _last_ratio,
 		"speed": pie.linear_velocity.length(),
 		"zone": "",
 		"time": Time.get_ticks_msec() / 1000.0,
 	})
+	pie.splattered.connect(_on_pie_splattered.bind(pie))
 
-
+func _on_pie_splattered(pie: PieProjectile) -> void:
+	var landed := pie.global_position
+	for i in range(_throws.size() -1, -1, -1):
+		var t: Dictionary = _throws[i]
+		if t["pie_id"] == pie.get_instance_id() and t["range"] < 0.0:
+			var flat := Vector3(landed.x - t["spawn"].x, 0.0, landed.z - t["spawn"].z)
+			t["range"] = flat.length()
+			return
+			
 func on_hit_zone_entered(zone: String, body: Node3D) -> void:
 	var id := body.get_instance_id()
 	# Walk backwards: the most recent unscored throw by this pie is the match.
@@ -129,9 +140,13 @@ func on_hit_zone_entered(zone: String, body: Node3D) -> void:
 # ---------------------------------------------------------------------------
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo \
-			and event.physical_keycode == KEY_L:
-		_print_summary()
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.physical_keycode:
+			KEY_L:
+				_print_summary()
+			KEY_C:
+				_throws.clear()
+				print("[DebugEval] clear throws")
 
 
 func _print_summary() -> void:
@@ -149,10 +164,17 @@ func _print_summary() -> void:
 	var pending := 0
 	var ratio_sum := 0.0
 
+	var range_sum := [0.0, 0.0, 0.0, 0.0]   # one slot per charge bucket
+	var range_cnt := [0, 0, 0, 0]
+	var range_min := INF                     # starts at +infinity so first value wins
+	var range_max := 0.0
+	var range_total := 0.0
+	var range_n := 0                          # how many resolved ranges we counted
 	for t in _throws:
 		var r: float = t["ratio"]
+		var b := clampi(int(r * 4.0), 0, 3)
+		buckets[b] += 1
 		ratio_sum += r
-		buckets[clampi(int(r * 4.0), 0, 3)] += 1
 		if r > 0.9:
 			full += 1
 		match t["zone"]:
@@ -165,8 +187,17 @@ func _print_summary() -> void:
 					miss += 1
 				else:
 					pending += 1
+		var rng: float = t["range"]
+		if rng >= 0.0:
+			range_sum[b] += rng
+			range_cnt[b] += 1
+			range_total += rng
+			range_n += 1
+			range_min = minf(range_min, rng)
+			range_max = maxf(range_max, rng)
 
 	var resolved := maxi(total - pending, 1)
+
 	print("[DebugEval] ---- session summary ----")
 	print("  throws: %d   mean charge: %.2f   full-charge (>0.9): %d (%.0f%%)"
 			% [total, ratio_sum / total, full, 100.0 * full / total])
@@ -176,3 +207,16 @@ func _print_summary() -> void:
 			% [head, body, miss, pending])
 	print("  hit rate (resolved throws): %.0f%%"
 			% (100.0 * float(head + body) / float(resolved)))
+
+	if range_n > 0:
+		print("  range (m)   min: %.2f   mean: %.2f   max: %.2f   (splat, n=%d)"
+				% [range_min, range_total / range_n, range_max, range_n])
+		var parts: Array[String] = []
+		for i in 4:
+			if range_cnt[i] > 0:
+				parts.append("%d-%d%%: %.2f" % [i * 25, i * 25 + 25, range_sum[i] / range_cnt[i]])
+			else:
+				parts.append("%d-%d%%: --" % [i * 25, i * 25 + 25])
+		print("  mean range by charge   " + "   ".join(parts))
+	else:
+		print("  range (m): no resolved throws yet")

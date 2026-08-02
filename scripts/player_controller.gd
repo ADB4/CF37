@@ -33,11 +33,17 @@ var _pitch := 0.0
 @export var projectile_parent: Node3D
 @export var min_throw_speed := 8.0
 @export var max_throw_speed := 22.0
-@export var full_charge_time := 0.6
+@export var full_charge_time := 1.0
 ## Grace window at the start of a hold during which charge stays at 0.
 ## Any release inside this window is a true zero-charge (min speed) throw.
 ## Charge only starts accumulating after the buffer elapses, so a full
 ## charge takes charge_buffer_time + full_charge_time of total hold.
+
+## linearly to 0 at full charge. Composed about the camera's RIGHT axis so it
+## stacks on top of player-controlled pitch (aiming down still lands short).
+## AC: uncharged throw lobs over a counter-height obstacle; full charge is flat.
+## Upward pitch (deg) added to the launch direction at zero charge, fading
+@export var lob_angle_deg := 30.0
 @export var charge_buffer_time := 0.15
 @export var throw_cooldown := 0.25
 
@@ -144,6 +150,23 @@ func _handle_throw(delta: float) -> void:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			_cancel_charge()
 
+## World-space unit launch direction for a given charge ratio (0..1).
+## ratio 0 -> camera-forward pitched up by lob_angle_deg (lob);
+## ratio 1 -> exactly camera-forward (flat). PUBLIC: CF37-74's reticle must
+## call THIS to simulate the same arc — one source of truth, no divergence.
+## AC: launch-direction computation extracted out of _throw().
+func launch_direction(charge_ratio: float) -> Vector3:
+	# TODO(you): forward = -camera.global_transform.basis.z
+	#            right   =  camera.global_transform.basis.x (normalize it)
+	#            angle   =  deg_to_rad(lob_angle_deg) * (1.0 - charge_ratio)
+	#            return forward.rotated(right, angle)
+	#   Sanity: +angle should tilt the aim UP. If it goes down, negate it and
+	#   ask yourself what that says about the camera basis handedness.
+	var forward := -_camera.global_transform.basis.z
+	var right := _camera.global_transform.basis.x.normalized()
+	var angle := deg_to_rad(lob_angle_deg) * (1.0 - charge_ratio)
+	return forward.rotated(right, angle)
+	
 func _throw() -> void:
 	_charging = false
 	var ratio := _charge_time / full_charge_time
@@ -157,7 +180,8 @@ func _throw() -> void:
 	pie.global_transform = _spawn_point.global_transform
 
 	var speed := lerpf(min_throw_speed, max_throw_speed, ratio)
-	pie.launch(-_camera.global_transform.basis.z, speed)
+	pie.launch(launch_direction(ratio), speed)  # was: -_camera.global_transform.basis.z
+	# TODO(you): call your new launch_direction(ratio) instead of raw forward
 
 	pie_thrown.emit(pie)
 	_cooldown_remaining = throw_cooldown

@@ -1,5 +1,5 @@
 extends Node3D
-const ROUND_DURATION := 10
+const ROUND_DURATION := 60
 
 enum GameState { READY, PLAYING, ROUND_OVER }
 
