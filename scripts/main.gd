@@ -10,22 +10,26 @@ var _last_printed_second := -1
 var _debug_eval: DebugEval
 
 @onready var _player: PlayerController = %PlayerController
-@onready var _target: TargetCharacter = %TargetCharacter
+@onready var _target_manager: Node3D = %TargetManager
 
 func _ready() -> void:
 	_player.pointer_lock_changed.connect(_on_pointer_lock_changed)
 	_player.charge_updated.connect(_on_charge_updated)
-	_target.hit.connect(_on_target_hit)
-	
 	_debug_eval = DebugEval.new()
 	add_child(_debug_eval)
 	_player.charge_updated.connect(_debug_eval.on_charge_updated)
 	_player.charge_released.connect(_debug_eval.on_charge_released)
 	_player.pie_thrown.connect(_debug_eval.on_pie_thrown)
-	_target.hit_zone_entered.connect(_debug_eval.on_hit_zone_entered)
-	
+	_wire_targets()
 	_enter_ready()
 	
+func _wire_targets():
+	for child in _target_manager.get_children():
+		var target := child as TargetBase
+		if target == null: continue
+		target.hit.connect(_on_target_hit)
+		target.hit_zone_entered.connect(_debug_eval.on_hit_zone_entered)
+		
 func _enter_ready() -> void:
 	_state = GameState.READY
 	_player.active = false
@@ -70,7 +74,7 @@ func _on_pointer_lock_changed(captured: bool) -> void:
 	if captured and _state != GameState.PLAYING:
 		_start_round()
 		
-func _on_target_hit(points: int, zone: String) -> void:
+func _on_target_hit(points: int, zone: String, _target: TargetBase) -> void:
 	if _state != GameState.PLAYING:
 		return
 	_score += points

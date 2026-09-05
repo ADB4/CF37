@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bvt5k215skod3"]
+
+[ext_resource type="PackedScene" uid="uid://b1h2pxtcblhlp" path="res://scenes/target_base.tscn" id="1_wessb"]
+[ext_resource type="Script" uid="uid://dpqmmkjnuenm6" path="res://scripts/target_clown.gd" id="2_clown"]
+
+[node name="TargetClown" unique_id=1860628569 instance=ExtResource("1_wessb")]
+script = ExtResource("2_clown")
+archetype_id = &"clown"

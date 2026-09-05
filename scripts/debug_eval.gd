@@ -125,7 +125,7 @@ func _on_pie_splattered(pie: PieProjectile) -> void:
 			t["range"] = flat.length()
 			return
 			
-func on_hit_zone_entered(zone: String, body: Node3D) -> void:
+func on_hit_zone_entered(zone: String, body: Node3D, _target: TargetBase = null) -> void:
 	var id := body.get_instance_id()
 	# Walk backwards: the most recent unscored throw by this pie is the match.
 	for i in range(_throws.size() - 1, -1, -1):
