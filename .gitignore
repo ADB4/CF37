@@ -11,11 +11,11 @@
 .godot/
 
 # ── Build output ─────────────────────────────────────────────────────────────
-# Web export goes to countyfair-37/build/web/.
+# Web export goes to build/web/.
 # GDExtension C++ build artifacts live in extension/build/ and extension/bin/.
 # Using explicit paths so we don't accidentally ignore a future directory
 # named "build" that we actually want.
-countyfair-37/build/
+/build/
 extension/build/
 extension/bin/
 

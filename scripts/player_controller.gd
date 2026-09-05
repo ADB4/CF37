@@ -156,12 +156,6 @@ func _handle_throw(delta: float) -> void:
 ## call THIS to simulate the same arc — one source of truth, no divergence.
 ## AC: launch-direction computation extracted out of _throw().
 func launch_direction(charge_ratio: float) -> Vector3:
-	# TODO(you): forward = -camera.global_transform.basis.z
-	#            right   =  camera.global_transform.basis.x (normalize it)
-	#            angle   =  deg_to_rad(lob_angle_deg) * (1.0 - charge_ratio)
-	#            return forward.rotated(right, angle)
-	#   Sanity: +angle should tilt the aim UP. If it goes down, negate it and
-	#   ask yourself what that says about the camera basis handedness.
 	var forward := -_camera.global_transform.basis.z
 	var right := _camera.global_transform.basis.x.normalized()
 	var angle := deg_to_rad(lob_angle_deg) * (1.0 - charge_ratio)
@@ -180,8 +174,7 @@ func _throw() -> void:
 	pie.global_transform = _spawn_point.global_transform
 
 	var speed := lerpf(min_throw_speed, max_throw_speed, ratio)
-	pie.launch(launch_direction(ratio), speed)  # was: -_camera.global_transform.basis.z
-	# TODO(you): call your new launch_direction(ratio) instead of raw forward
+	pie.launch(launch_direction(ratio), speed)
 
 	pie_thrown.emit(pie)
 	_cooldown_remaining = throw_cooldown
