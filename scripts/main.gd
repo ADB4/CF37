@@ -29,6 +29,7 @@ func _wire_targets():
 		if target == null: continue
 		target.hit.connect(_on_target_hit)
 		target.hit_zone_entered.connect(_debug_eval.on_hit_zone_entered)
+		_debug_eval.register_target(target)
 		
 func _enter_ready() -> void:
 	_state = GameState.READY
