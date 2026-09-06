@@ -187,7 +187,7 @@ func on_hit_zone_entered(zone: String, body: Node3D, target: TargetBase = null) 
 		if t["pie_id"] == id and t["zone"] == "":
 			t["zone"] = zone
 			if target != null:
-				t["hit_i"] = target.archetype_id
+				t["hit_id"] = target.archetype_id
 				t["points"] = target.head_points if zone == "head" else target.body_points
 			return
 
@@ -222,8 +222,8 @@ func _nearest_archetype(point: Vector3) -> StringName:
 ## crossing-start / crossing-end / hit so "held fire" becomes measurable. Just
 ## appends (inert until something calls it); the tally lives in the summary.
 ## AC: (4) summary prints crossings / anti-target hits / held fire.
-func log_event(name: StringName) -> void:
-	_events.append({"name": name, "timestamp": Time.get_ticks_msec()})
+func log_event(event_name: StringName) -> void:
+	_events.append({"name": event_name, "timestamp": Time.get_ticks_msec()})
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +242,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _print_summary() -> void:
-	log_event(&"crossing-start")
 	var total := _throws.size()
 	if total == 0:
 		print("[DebugEval] no throws logged yet")
