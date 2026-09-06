@@ -3,6 +3,16 @@
 # =============================================================================
 
 
+# ── Local-only project docs ──────────────────────────────────────────────────
+# CLAUDE.md (pairing contract) and CONTRACTS.md (name registry) are kept local
+# by choice — purged from history via git filter-repo, solo repo so no
+# collaborator clones to break. Both files still live on disk; contract_check.py
+# reads CONTRACTS.md straight off disk, so tooling is unaffected. What's lost
+# is CONTRACTS.md's per-story git history — the done-gate's "contract diff
+# clean" step and cf37-audit's git-log checks no longer have anything to diff.
+CLAUDE.md
+CONTRACTS.md
+
 # ── Godot 4 engine cache ─────────────────────────────────────────────────────
 # .godot/ contains editor state, shader cache, and the imported/ directory
 # where Godot stores compiled resources (.ctex, .scn). Everything here is
