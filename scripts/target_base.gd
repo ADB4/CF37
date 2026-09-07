@@ -25,6 +25,18 @@ signal hit_zone_entered(zone: String, body: Node3D, target: TargetBase)
 enum MovementMode { STATIONARY, PATH }
 
 
+## Canonical animation names (CF37-14) — the contract every future rig must
+## match. Not every archetype ships all six; a name the backend lacks is a
+## silent no-op, never an error (decision 14.1). `duck` = drop-into-cover
+## (redefined from the archived CF37-13 dodge; owned by CF37-62).
+const ANIM_IDLE := &"idle"
+const ANIM_WALK := &"walk"
+const ANIM_DUCK := &"duck"
+const ANIM_COWER := &"cower"
+const ANIM_HIT := &"hit"
+const ANIM_TAUNT := &"taunt"
+
+
 @export_group("Identity")
 
 ## Stable id for instrumentation/attribution (CF37-73). e.g. "clown", "dummy".
@@ -69,6 +81,15 @@ var defeated := false
 ## Current rail direction for the default ping-pong (+1 → +X, -1 → -X).
 var _patrol_dir := 1.0
 
+## Animation backend, detected once in `_detect_animation_backend` (CF37-14).
+## Exactly one shape wins: a state-machine AnimationTree sets `_anim_playback`
+## and `_anim_sm_root`; a plain AnimationPlayer sets `_anim_player`; all three
+## null means no backend, so `_play_anim` routes to the placeholder path.
+## AC: AC1 (no backend → placeholder), AC2/AC3 (backend → travel/play or no-op).
+var _anim_player: AnimationPlayer = null
+var _anim_playback: AnimationNodeStateMachinePlayback = null
+var _anim_sm_root: AnimationNodeStateMachine = null
+
 
 @onready var _hit_zone_head: Area3D = $Pivot/HitZoneHead
 @onready var _hit_zone_body: Area3D = $Pivot/HitZoneBody
@@ -80,6 +101,55 @@ func _ready() -> void:
 		push_warning("rail-guard triggered")
 	_hit_zone_head.body_entered.connect(_on_hit_zone_body_entered.bind("head"))
 	_hit_zone_body.body_entered.connect(_on_hit_zone_body_entered.bind("body"))
+	_detect_animation_backend()
+
+# ---------------------------------------------------------------------------
+# Animation backend  (CF37-14: rig-swap insurance)
+# ---------------------------------------------------------------------------
+
+## AC1/AC2/AC3: detect the animation backend once, at spawn. Prefer an
+## AnimationTree whose `tree_root` is an AnimationNodeStateMachine (cache its
+## playback object + root, activate the tree); else the first AnimationPlayer;
+## else leave every cache null so `_play_anim` falls through to the placeholder.
+## Search with owned=false so an AnimationTree inside an imported rig (owned by
+## the rig root, not this scene) is still found — capability, not configuration.
+func _detect_animation_backend() -> void:
+	for node in find_children("*", "AnimationTree", true, false):
+		var tree := node as AnimationTree
+		var state_machine := tree.tree_root as AnimationNodeStateMachine
+		if state_machine == null:
+			continue
+		_anim_sm_root = state_machine
+		_anim_playback = tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
+		tree.active = true
+		return
+	for node in find_children("*", "AnimationPlayer", true, false):
+		_anim_player = node as AnimationPlayer
+		return
+
+## AC2/AC3: route one canonical anim name to whatever backend exists — state
+## machine first (guard `travel` with the cached root's `has_node`), then
+## AnimationPlayer (guard `play` with `has_animation`), then placeholder. A
+## detected backend that lacks the name is a SILENT no-op, no error (14.1).
+## Param is `anim`, not `name`: `name` shadows Node.name (SHADOWED_VARIABLE_
+## BASE_CLASS at parse — the CF37-73 `event_name` precedent).
+func _play_anim(anim: StringName) -> void:
+	if _anim_sm_root != null:
+		if _anim_sm_root.has_node(anim):
+			_anim_playback.travel(anim)
+		return
+	if _anim_player != null:
+		if _anim_player.has_animation(anim):
+			_anim_player.play(anim)
+		return
+	_play_placeholder(anim)
+
+
+## AC1: fallback when no backend answers. STUB until CF37-23 — a print here is
+## the AC1/AC2 evidence ("logger, not vibes"). Do NOT implement the tween now;
+## CF37-23 fills the body and keeps this signature.
+func _play_placeholder(anim: StringName) -> void:
+	print("No animation for ", anim)
 
 # ---------------------------------------------------------------------------
 # Path locomotion  (AC4: a PATH instance honours its exports)
