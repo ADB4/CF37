@@ -72,6 +72,14 @@ const ANIM_TAUNT := &"taunt"
 ## Patrol speed along the rail (m/s). Placeholder — CF37-12 owns it.
 @export var patrol_speed := 1.5
 
+@export_group("Animation")
+
+## AC1: seconds a `hit` reaction owns the rig before locomotion resumes. The one
+## exported lock duration — cower/duck/taunt are supplied by the caller. Tuning is
+## data-driven (hard rule): change only on DebugEval evidence; 0.4 is the CF37-22
+## initial default from the ticket.
+@export var hit_lock_time := 0.4
+
 
 ## True once knocked out; hits are rejected and movement halts while set. The
 ## knockout *signal* is CF37-15 (`knocked_out`) — this stays a variable
@@ -89,6 +97,17 @@ var _patrol_dir := 1.0
 var _anim_player: AnimationPlayer = null
 var _anim_playback: AnimationNodeStateMachinePlayback = null
 var _anim_sm_root: AnimationNodeStateMachine = null
+
+## AC1/AC3: remaining one-shot action-lock time (s). While > 0, locomotion yields
+## and the current action anim owns the rig; ticked down in `_physics_process`.
+## Armed by `_play_action_anim`; CF37-15/62 arm the concept, never poke the field.
+var _action_lock := 0.0
+
+## AC2: last locomotion name pushed to `_play_anim`, so a steady state doesn't
+## re-fire every frame (one call per transition). Cleared when an action lock
+## expires and on `reset()` so idle/walk re-asserts. `&""` = nothing asserted yet
+## (the next choice always plays).
+var _last_locomotion_anim: StringName = &""
 
 
 @onready var _hit_zone_head: Area3D = $Pivot/HitZoneHead
@@ -151,6 +170,45 @@ func _play_anim(anim: StringName) -> void:
 func _play_placeholder(anim: StringName) -> void:
 	print("No animation for ", anim)
 
+
+## AC1/AC2: pick idle/walk from horizontal speed and push it to `_play_anim` ONLY
+## when the choice changes (the `_last_locomotion_anim` guard), so a steady walk
+## doesn't re-trigger every frame. Called every physics frame — including for
+## STATIONARY targets, which resolve to idle — but yields to any one-shot: a live
+## `_action_lock`, `defeated`, or `_locomotion_suppressed()` short-circuits it so
+## the action/cover anim is never overwritten mid-play.
+## AC: AC1 (hit survives the same-frame locomotion pass), AC2 (one call per edge).
+func _update_locomotion_anim() -> void:
+	if defeated or _action_lock > 0.0 or _locomotion_suppressed():
+		return
+	var next := ANIM_WALK if absf(velocity.x) > 0.1 else ANIM_IDLE
+	if next == _last_locomotion_anim:
+		return
+	_last_locomotion_anim = next
+	_play_anim(next)
+
+
+## AC1/AC3: start a one-shot action anim (hit / duck / cower / taunt) and hold it
+## for `lock_time` seconds — arm `_action_lock`, clear `_last_locomotion_anim` so
+## locomotion re-asserts once the lock expires. NAME-AGNOSTIC: a `taunt` lock is
+## indistinguishable from a `hit` lock, only the duration differs (AC3). `hit`
+## passes `hit_lock_time`; cower/duck/taunt durations are the caller's (CF37-15
+## respawn_delay, CF37-62 timings). Param is `anim`, not `name` — `name` shadows
+## Node.name → SHADOWED_VARIABLE_BASE_CLASS (CF37-14 `_play_anim` / CF37-73 precedent).
+## AC: AC1 (lock preempts locomotion), AC3 (name-agnostic lock).
+func _play_action_anim(anim: StringName, lock_time: float) -> void:
+	_last_locomotion_anim = &""
+	_action_lock = lock_time
+	_play_anim(anim)
+
+
+## AC1: cover/suppression seam — while true, locomotion is skipped even when the
+## body is moving. Default false (a plain target always animates its walk/idle);
+## CF37-62's taunter overrides this to freeze locomotion while hidden (22.5).
+## Stays a seam this story — no cover logic here.
+func _locomotion_suppressed() -> bool:
+	return false
+
 # ---------------------------------------------------------------------------
 # Path locomotion  (AC4: a PATH instance honours its exports)
 # ---------------------------------------------------------------------------
@@ -158,12 +216,19 @@ func _play_placeholder(anim: StringName) -> void:
 ## AC4: PATH archetypes patrol; STATIONARY and defeated bodies hold still.
 ## Mechanics only — the *decision* of where to go is the `_patrol` seam.
 func _physics_process(delta: float) -> void:
-	if movement_mode != MovementMode.PATH or defeated:
-		velocity = Vector3.ZERO; return
-	_patrol(delta)
-	velocity.y = 0.0
-	move_and_slide()
-	position.x = clampf(position.x, path_min_x, path_max_x)
+	if _action_lock > 0.0:
+		_action_lock -= delta
+		if _action_lock <= 0.0:
+			_action_lock = 0.0
+			_last_locomotion_anim = &""
+	if movement_mode == MovementMode.PATH and not defeated:
+		_patrol(delta)
+		velocity.y = 0.0
+		move_and_slide()
+		position.x = clampf(position.x, path_min_x, path_max_x)
+	else:
+		velocity = Vector3.ZERO
+	_update_locomotion_anim()
 
 
 ## AC4: movement-personality seam. Default = a straight, metronomic ping-pong
