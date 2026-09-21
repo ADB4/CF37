@@ -5,4 +5,9 @@
 
 [node name="TargetClown" unique_id=1860628569 instance=ExtResource("1_wessb")]
 script = ExtResource("2_clown")
+pause_chance = 0.35
+midpoint_chance = 0.5
+pause_min = 0.5
+pause_max = 1.4
 archetype_id = &"clown"
+movement_mode = 1
