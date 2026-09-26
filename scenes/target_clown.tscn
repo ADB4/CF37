@@ -11,3 +11,4 @@ pause_min = 0.5
 pause_max = 1.4
 archetype_id = &"clown"
 movement_mode = 1
+patrol_speed = 3.0
